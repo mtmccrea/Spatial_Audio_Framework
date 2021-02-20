@@ -82,6 +82,7 @@
 		50E3DFBA24E1B64800589B17 /* ambi_roomsim.c in Sources */ = {isa = PBXBuildFile; fileRef = 50E3DFB824E1B64800589B17 /* ambi_roomsim.c */; };
 		50E5CD1624AF3E5800019898 /* saf_utility_geometry.c in Sources */ = {isa = PBXBuildFile; fileRef = 50E5CD1424AF3E5800019898 /* saf_utility_geometry.c */; };
 		50E5CDAA24B4580900019898 /* saf_utility_latticeCoeffs.c in Sources */ = {isa = PBXBuildFile; fileRef = 50E5CDA924B4580900019898 /* saf_utility_latticeCoeffs.c */; };
+		57D5BC3825E1472700FF989F /* saf_utility_dvf.c in Sources */ = {isa = PBXBuildFile; fileRef = 57D5BC3725E1472700FF989F /* saf_utility_dvf.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -256,6 +257,8 @@
 		50E5CD1424AF3E5800019898 /* saf_utility_geometry.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = saf_utility_geometry.c; sourceTree = "<group>"; };
 		50E5CD1524AF3E5800019898 /* saf_utility_geometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = saf_utility_geometry.h; sourceTree = "<group>"; };
 		50E5CDA924B4580900019898 /* saf_utility_latticeCoeffs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = saf_utility_latticeCoeffs.c; sourceTree = "<group>"; };
+		57D5BC3625E1472700FF989F /* saf_utility_dvf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = saf_utility_dvf.h; sourceTree = "<group>"; };
+		57D5BC3725E1472700FF989F /* saf_utility_dvf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = saf_utility_dvf.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -468,6 +471,8 @@
 				50E36030249BDDCC00B74C25 /* saf_utility_sort.h */,
 				50E3603E249BDDCC00B74C25 /* saf_utility_veclib.c */,
 				50E3602F249BDDCC00B74C25 /* saf_utility_veclib.h */,
+				57D5BC3625E1472700FF989F /* saf_utility_dvf.h */,
+				57D5BC3725E1472700FF989F /* saf_utility_dvf.c */,
 			);
 			path = saf_utilities;
 			sourceTree = "<group>";
@@ -855,6 +860,7 @@
 				508CC48124EAA0A4006DF0C7 /* saf_tracker.c in Sources */,
 				50E3DEBD24C1C56800589B17 /* ambi_enc.c in Sources */,
 				50E36074249BDDCC00B74C25 /* saf_sh.c in Sources */,
+				57D5BC3825E1472700FF989F /* saf_utility_dvf.c in Sources */,
 				50E3DEB824C1C36E00589B17 /* ambi_drc_internal.c in Sources */,
 				50E3607B249BDDCC00B74C25 /* saf_hrir.c in Sources */,
 				508CC48024EAA0A4006DF0C7 /* saf_tracker_internal.c in Sources */,
