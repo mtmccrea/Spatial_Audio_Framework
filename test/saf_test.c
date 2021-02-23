@@ -72,6 +72,7 @@ int main_test(void) {
 
     /* run each unit test */ 
     RUN_TEST(test__quaternion);
+    RUN_TEST(test__dvf_dummyFunc);
     RUN_TEST(test__saf_stft_50pc_overlap);
     RUN_TEST(test__saf_stft_LTI);
     RUN_TEST(test__ims_shoebox_RIR);
@@ -159,6 +160,14 @@ void test__quaternion(void){
         for(j=0; j<9; j++)
             TEST_ASSERT_TRUE(fabsf(residual[j])<1e-3f); 
     }
+}
+
+void test__dvf_dummyFunc(void){
+    int a, b;
+    a = 2;
+    b = levelUp(a);
+    
+    TEST_ASSERT_EQUAL(a+1, b);
 }
 
 void test__saf_stft_50pc_overlap(void){

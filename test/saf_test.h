@@ -25,6 +25,9 @@ int main_test(void);
  * are reversible */
 void test__quaternion(void);
 /**
+* Testing that I can run a test function at all! */
+void test__dvf_dummyFunc(void);
+/**
  * Testing for perfect reconstruction of the saf_stft (when configured for 50%
  * window overlap) */
 void test__saf_stft_50pc_overlap(void);

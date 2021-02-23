@@ -30,7 +30,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-    
+
+#include "saf_utilities.h" // MTM added... why wasn't this here?
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
