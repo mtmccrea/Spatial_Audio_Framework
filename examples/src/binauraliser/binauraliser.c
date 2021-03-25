@@ -43,6 +43,8 @@ void binauraliser_create
     printf(SAF_VERSION_LICENSE_STRING);
 
     /* user parameters */
+    // TODO: why isn't the pointer to pData->src_dirs_deg sent in here... it doens't appear to be initialized?
+    // The issue comes up because src_dists should prob be set the same way... mtm
     binauraliser_loadPreset(SOURCE_CONFIG_PRESET_DEFAULT, pData->src_dirs_deg, &(pData->new_nSources), &(pData->input_nDims)); /*check setStateInformation if you change default preset*/
     pData->useDefaultHRIRsFLAG = 1; /* pars->sofa_filepath must be valid to set this to 0 */
     pData->enableHRIRsPreProc = 1;
@@ -56,6 +58,10 @@ void binauraliser_create
     pData->bFlipRoll = 0;
     pData->useRollPitchYawFlag = 0;
     pData->enableRotation = 0;
+    
+    /* DVF params */
+    pData->head_radius_recip = 1.f / 0.0875; // TODO: make variable
+    memset(pData->src_dists, 3.0f, MAX_NUM_INPUTS * sizeof(float)); // TODO: proper way to set? default distance 3 m, change?
 
     /* time-frequency transform + buffers */
     pData->hSTFT = NULL;
@@ -206,6 +212,7 @@ void binauraliser_process
         /* get last frame's final sample for DVF IIR filter */
         float wzL = pData->outframeTD[0][FRAME_SIZE-1]; // TODO: confirm indexing, should be pointer?
         float wzR = pData->outframeTD[1][FRAME_SIZE-1];
+        float fs =(float)pData->fs; // TODO: why is pData->fs an int?
 
         /* Load time-domain data */
         for(i=0; i < MIN(nSources,nInputs); i++)
@@ -265,18 +272,19 @@ void binauraliser_process
         
         
         /* apply DVF */
-        // TODO: what is the consideration for `MIN(NUM_EARS, nOutputs)`?
-        float azim = src_dirs[0][0]; // azimuth of (first) source
-        float thetaLR[2] = {0.0, 0.0}; // init, to be set by convertFrontalDoAToIpsilateral, TODO: need to cleanup? store globally like src_dirs
-        float rho = 1.5;
-        convertFrontalDoAToIpsilateral(azim, &thetaLR[0]);
-        applyDVF(thetaLR[0], rho, pData->outframeTD[0], FRAME_SIZE, pData->fs,
-                 &wzL, // TODO: ensure proper *wz, needs to be retained from previous pass
-                 pData->outframeTD[0]);
-        applyDVF(thetaLR[1], rho, pData->outframeTD[1], FRAME_SIZE, pData->fs,
-                 &wzR, // TODO: ensure proper *wz, needs to be retained from previous pass
-                 pData->outframeTD[1]);
-        
+        // TODO: Temporarily assuming one source
+        float rho = pData->src_dists[0] * pData->head_radius_recip;
+        if (rho < 25.f) { // Distance threshold: 2.1875 m distance, given head radius of 0.0875 m
+            // TODO: what is the consideration for `MIN(NUM_EARS, nOutputs)` below?
+            float azim = src_dirs[0][0];                    // azimuth of (first) source TODO: only update on change
+            float thetaLR[2] = {0.0, 0.0};                  // TODO: need to cleanup? store globally like src_dirs?
+            convertFrontalDoAToIpsilateral(azim, &thetaLR[0]);
+            applyDVF(thetaLR[0], rho, pData->outframeTD[0], // TODO: confirm channel indexing
+                     FRAME_SIZE, fs,
+                     &wzL,                                  // TODO: confirm wz, needs to be from previous pass output
+                     pData->outframeTD[0]);
+            applyDVF(thetaLR[1], rho, pData->outframeTD[1], FRAME_SIZE, fs, &wzR, pData->outframeTD[1]);
+        }
         
         /* Copy to output buffer */
         for (ch = 0; ch < MIN(NUM_EARS, nOutputs); ch++)

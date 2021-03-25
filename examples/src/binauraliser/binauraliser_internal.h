@@ -125,6 +125,8 @@ typedef struct _binauraliser
     int nSources;
     int new_nSources;
     float src_dirs_deg[MAX_NUM_INPUTS][2];
+    float src_dists[MAX_NUM_INPUTS];
+    float head_radius_recip;
     INTERP_MODES interpMode;
     int useDefaultHRIRsFLAG;                 /**< 1: use default HRIRs in database, 0: use those from SOFA file */
     int enableHRIRsPreProc;                  /**< flag to apply pre-processing to the currently loaded HRTFs */
