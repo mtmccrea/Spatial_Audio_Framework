@@ -202,6 +202,10 @@ void binauraliser_process
     /* apply binaural panner */
     if ((nSamples == FRAME_SIZE) && (pData->hrtf_fb!=NULL) && (pData->codecStatus==CODEC_STATUS_INITIALISED) ){
         pData->procStatus = PROC_STATUS_ONGOING;
+        
+        /* get last frame's final sample for DVF IIR filter */
+        float wzL = pData->outframeTD[0][FRAME_SIZE-1]; // TODO: confirm indexing, should be pointer?
+        float wzR = pData->outframeTD[1][FRAME_SIZE-1];
 
         /* Load time-domain data */
         for(i=0; i < MIN(nSources,nInputs); i++)
@@ -258,7 +262,22 @@ void binauraliser_process
 
         /* inverse-TFT */
         afSTFT_backward(pData->hSTFT, pData->outputframeTF, FRAME_SIZE, pData->outframeTD);
-
+        
+        
+        /* apply DVF */
+        // TODO: what is the consideration for `MIN(NUM_EARS, nOutputs)`?
+        float azim = src_dirs[0][0]; // azimuth of (first) source
+        float thetaLR[2] = {0.0, 0.0}; // init, to be set by convertFrontalDoAToIpsilateral, TODO: need to cleanup? store globally like src_dirs
+        float rho = 1.5;
+        convertFrontalDoAToIpsilateral(azim, &thetaLR[0]);
+        applyDVF(thetaLR[0], rho, pData->outframeTD[0], FRAME_SIZE, pData->fs,
+                 &wzL, // TODO: ensure proper *wz, needs to be retained from previous pass
+                 pData->outframeTD[0]);
+        applyDVF(thetaLR[1], rho, pData->outframeTD[1], FRAME_SIZE, pData->fs,
+                 &wzR, // TODO: ensure proper *wz, needs to be retained from previous pass
+                 pData->outframeTD[1]);
+        
+        
         /* Copy to output buffer */
         for (ch = 0; ch < MIN(NUM_EARS, nOutputs); ch++)
             utility_svvcopy(pData->outframeTD[ch], FRAME_SIZE, outputs[ch]);
