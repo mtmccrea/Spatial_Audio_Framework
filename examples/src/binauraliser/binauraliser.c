@@ -43,8 +43,6 @@ void binauraliser_create
     printf(SAF_VERSION_LICENSE_STRING);
 
     /* user parameters */
-    // TODO: why isn't the pointer to pData->src_dirs_deg sent in here... it doens't appear to be initialized?
-    // The issue comes up because src_dists should prob be set the same way... mtm
     binauraliser_loadPreset(SOURCE_CONFIG_PRESET_DEFAULT, pData->src_dirs_deg, &(pData->new_nSources), &(pData->input_nDims)); /*check setStateInformation if you change default preset*/
     pData->useDefaultHRIRsFLAG = 1; /* pars->sofa_filepath must be valid to set this to 0 */
     pData->enableHRIRsPreProc = 1;
@@ -59,10 +57,13 @@ void binauraliser_create
     pData->useRollPitchYawFlag = 0;
     pData->enableRotation = 0;
     
-    /* DVF params */
+    /* Nearfield DVF variables*/
     pData->head_radius_recip = 1.f / 0.0875; // TODO: make variable
-    memset(pData->src_dists, 3.0f, MAX_NUM_INPUTS * sizeof(float)); // TODO: proper way to set? default distance 3 m, change?
-
+    /* NOTE: this default distance values is also hardcoded in
+       PluginProcessor::loadConfiguration & PluginProcessor::setStateInformation */
+    // TODO: proper way to set? default distance 3 m, change?
+    memset(pData->src_dists_m, 3.0f, MAX_NUM_INPUTS * sizeof(float));
+    
     /* time-frequency transform + buffers */
     pData->hSTFT = NULL;
     pData->inputFrameTD = (float**)malloc2d(MAX_NUM_INPUTS, FRAME_SIZE, sizeof(float));
@@ -271,9 +272,9 @@ void binauraliser_process
         afSTFT_backward(pData->hSTFT, pData->outputframeTF, FRAME_SIZE, pData->outframeTD);
         
         
-        /* apply DVF */
+        /* apply DVF for near field proximity*/
         // TODO: Temporarily assuming one source
-        float rho = pData->src_dists[0] * pData->head_radius_recip;
+        float rho = pData->src_dists_m[0] * pData->head_radius_recip;
         if (rho < 25.f) { // Distance threshold: 2.1875 m distance, given head radius of 0.0875 m
             // TODO: what is the consideration for `MIN(NUM_EARS, nOutputs)` below?
             float azim = src_dirs[0][0];                    // azimuth of (first) source TODO: only update on change
@@ -335,6 +336,16 @@ void binauraliser_setSourceElev_deg(void* const hBin, int index, float newElev_d
         pData->src_dirs_deg[index][1] = newElev_deg;
         pData->recalc_hrtf_interpFLAG[index] = 1;
         pData->recalc_M_rotFLAG = 1;
+    }
+}
+
+void binauraliser_setSourceDist_m(void* const hBin, int index, float newDist_m)
+{
+    binauraliser_data *pData = (binauraliser_data*)(hBin);
+    newDist_m = MAX(newDist_m, 0.15f);                      // TODO: is this clamped elsewhere?
+    if(pData->src_dists_m[index] != newDist_m){
+        pData->src_dists_m[index] = newDist_m;
+//        pData->recalc_hrtf_interpFLAG[index] = 1;         // TODO: need similar recalc flag for distance?
     }
 }
 
@@ -494,6 +505,12 @@ float binauraliser_getSourceElev_deg(void* const hBin, int index)
 {
     binauraliser_data *pData = (binauraliser_data*)(hBin);
     return pData->src_dirs_deg[index][1];
+}
+
+float binauraliser_getSourceDist_m(void* const hBin, int index)
+{
+    binauraliser_data *pData = (binauraliser_data*)(hBin);
+    return pData->src_dists_m[index];
 }
 
 int binauraliser_getNumSources(void* const hBin)
